@@ -36,12 +36,14 @@ class Neatline_RecordsController extends Neatline_Controller_Rest
                 case 'zoom':
                 case 'limit':
                 case 'start': 
+                    # quote as integer
                     $params[$key] = get_db()->quote($val, "INT");
                     break;
                 case 'extent':
-                    # do nothing, extent is filtered elsewhere
+                    # do nothing, extent is dealt with in the `filterExtent` function in `NeatlineRecordTable.php`
                     break;
                 case 'order':
+                    # ensure order is a valid column header, otherwise toss it
                     if (!in_array($val, array("id","owner_id","item_id","exhibit_id","added","modified",
                                             "is_coverage","is_wms","slug","title","item_title","body",
                                             "coverage","tags","widgets","presenter","fill_color",
@@ -54,7 +56,13 @@ class Neatline_RecordsController extends Neatline_Controller_Rest
                         unset($params['order']);
                     }
                     break;
+                case 'module':
+                case 'controller':
+                    # quote as varchar
+                    $params[$key] = get_db()->quote($val, "VARCHAR");
+                    break;
                 default:
+                    _log("Quoting text for key: $key", Zend_Log::INFO);
                     $params[$key] = get_db()->quote($val);
                     break;
             }
